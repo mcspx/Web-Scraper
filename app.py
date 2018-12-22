@@ -5,9 +5,8 @@ import re
 from datetime import datetime
 import time
 import redis
-
+import json
 async def getContent(url='',political='',n=0):
-    #print(url)
     start = (datetime.now().timestamp())
     #print('connecting...')
     r=requests.get(url)
@@ -121,12 +120,29 @@ async def main():
         await getGGContent(url+p,p,n)
     
     #await getGGContent(url+political[0],political[0],1)
-    r = redis.Redis(host='localhost', port=6379, db=0)
+    #r = redis.Redis(host='localhost', port=6379, db=0)
     for key in r.keys():
         print(key,'=',r.get(key))
     #await asyncio.create_task(getGGContent(url+political[0],political[0]))
     
 # Python 3.7+
 asyncio.run(main())
-#asyncio.run(getListPolitical())
+list_political = asyncio.run(getListPolitical())
 #print(((int)(end - start)))
+
+political_data = []
+r = redis.Redis(host='localhost', port=6379, db=0)
+i = 0
+for p in list_political:
+    i = i + 1
+    val = int(r.get("n"+str(i)))
+    #print(p,'=>',val)
+    political_data.append({"id":i,"name":p,"count":val})
+
+jdata = {}
+jdata['political_data'] = political_data
+jdata['totalSite'] = int(r.get("totalSite"))
+#print(jdata)
+
+with open("jdata.json","w") as outfile:
+    json.dump(jdata,outfile)
