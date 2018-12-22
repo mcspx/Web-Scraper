@@ -34,13 +34,14 @@ async def getContent(url='',political='',n=0):
                         print('dup url')
                         continue
                     else:
+                        print(a.text)
                         links.append(fw_url)
                         #await asyncio.create_task(getContent(fw_url,political)) 
                         asyncio.run(getContent(fw_url,political,n))
                 #fw_url = "https://www.google.com/"+fw_url
             #print(tag_a.text,'->',fw_url)
         except:
-            break
+            continue
             #print('error')
         
     end = (datetime.now().timestamp())  
@@ -54,7 +55,6 @@ async def getGGContent(url='',political='',n=0):
     #asyncio.create_task(countString(soup,political))
     await countString(soup,political,n)
     data = soup.findAll(attrs={"class":"r"})
-    print(len(data))
     for c in data:
         try:
             #total=total+1
@@ -63,7 +63,7 @@ async def getGGContent(url='',political='',n=0):
             fw_url = fw_url.replace('/url?q=','')
             if(fw_url.startswith('http') == False):
                 fw_url = "https://www.google.com/"+fw_url
-            print(tag_a.text)
+            print(c.text)
             if(fw_url.find('google') == -1):
                 await asyncio.create_task(getContent(fw_url,political,n)) 
                 #await asyncio.run(getContent(fw_url,political))
@@ -73,12 +73,13 @@ async def getGGContent(url='',political='',n=0):
     end = (datetime.now().timestamp())  
 
 async def countString(soup,str,n):
+    print("counting..")
     body = soup.findAll('body')
     cnt_str = 0
     for b in body:
         cnt_str = cnt_str + b.text.count(str)
     await countArticle(cnt_str,n)
-    print('total cnt str(',str,') = ',cnt_str)
+    #print('total cnt str(',str,') = ',cnt_str)
 async def countArticle(cnt,n=0):
     key = "n"+str(n)
     r = redis.Redis(host='localhost', port=6379, db=0)
