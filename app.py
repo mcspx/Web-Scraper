@@ -5,13 +5,16 @@ import re
 from datetime import datetime
 import time
 async def getContent(url='',political=''):
-    print(url)
+    #print(url)
     start = (datetime.now().timestamp())
+    #print('connecting...')
     r=requests.get(url)
+    #print('connected')
     soup = BeautifulSoup(r.content,'html.parser')
-    asyncio.create_task(countString(soup,political))
+    #asyncio.create_task(countString(soup,political))
+    await countString(soup,political)
     data = soup.findAll('a')
-    print('data->len',len(data))
+    #print('data->len',len(data))
     limit = 10
     links = []
     for a in data:
@@ -26,10 +29,12 @@ async def getContent(url='',political=''):
                 if(fw_url.find('google') == -1):
                     #print('n = ',n)
                     if fw_url in links:
+                        print('dup url')
                         continue
                     else:
                         links.append(fw_url)
-                        asyncio.create_task(getContent(fw_url,political)) 
+                        #await asyncio.create_task(getContent(fw_url,political)) 
+                        asyncio.run(getContent(fw_url,political))
                 #fw_url = "https://www.google.com/"+fw_url
             #print(tag_a.text,'->',fw_url)
         except:
@@ -42,7 +47,8 @@ async def getGGContent(url='',political=''):
     start = (datetime.now().timestamp())
     r=requests.get(url)
     soup = BeautifulSoup(r.content,'html.parser')
-    asyncio.create_task(countString(soup,political))
+    #asyncio.create_task(countString(soup,political))
+    await countString(soup,political)
     data = soup.findAll(attrs={"class":"r"})
     print(len(data))
     for c in data:
@@ -56,6 +62,7 @@ async def getGGContent(url='',political=''):
             print(tag_a.text)
             if(fw_url.find('google') == -1):
                 await asyncio.create_task(getContent(fw_url,political)) 
+                #await asyncio.run(getContent(fw_url,political))
 
         except:
             continue
@@ -74,9 +81,10 @@ async def main():
     # 10 political
     political = ['พรรคประชาธิปัตย์','พรรคประชากรไทย','พรรคมหาชน','พรรคกสิกรไทย','พรรคเพื่อฟ้าดิน','พรรคความหวังใหม่','พรรคเครือข่ายชาวนาแห่งประเทศไทย','พรรคเพื่อไทย','พรรคเพื่อแผ่นดิน','พรรคชาติพัฒนา']
     #url = 'https://en.wikipedia.org/wiki/'
-    #for p in political:
-    #    await asyncio.create_task(getGGContent(url+p,p))
-    await asyncio.create_task(getGGContent(url+political[0],political[0]))
+    for p in political:
+        await getGGContent(url+p,p)
+    #await asyncio.create_task(getGGContent(url+political[0],political[0]))
+    #await getGGContent(url+political[0],political[0])
     
 # Python 3.7+
 #total = 0
