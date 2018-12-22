@@ -106,7 +106,7 @@ async def main():
     #await getGGContent(url+political[0],political[0],1)
     r = redis.Redis(host='localhost', port=6379, db=0)
     for key in r.keys():
-        print(key,'=',r.get(key))
+        print(key,'=',r.get(key),'->',political[int(key.replace('n',''))-1])
     #await asyncio.create_task(getGGContent(url+political[0],political[0]))
     
     
@@ -117,4 +117,3 @@ asyncio.run(main())
 #time.sleep(5)
 
 #print(((int)(end - start)))
-
