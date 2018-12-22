@@ -5,22 +5,35 @@ import re
 from datetime import datetime
 import time
 async def getContent(url='',political=''):
-    #print(url)
+    print(url)
     start = (datetime.now().timestamp())
     r=requests.get(url)
     soup = BeautifulSoup(r.content,'html.parser')
-    await countString(soup,political)
+    asyncio.create_task(countString(soup,political))
     data = soup.findAll('a')
+    print('data->len',len(data))
+    limit = 10
+    links = []
     for a in data:
+        #limit = limit - 1
+        #if limit == 0:
+        #    print('break')
+        #    break
         try:
             fw_url = str(a['href'])
             fw_url = fw_url.replace('/url?q=','')
             if(fw_url.startswith('http') == True):
-                await asyncio.create_task(getContent(fw_url,political)) 
+                if(fw_url.find('google') == -1):
+                    #print('n = ',n)
+                    if fw_url in links:
+                        continue
+                    else:
+                        links.append(fw_url)
+                        asyncio.create_task(getContent(fw_url,political)) 
                 #fw_url = "https://www.google.com/"+fw_url
             #print(tag_a.text,'->',fw_url)
         except:
-            pass
+            break
             #print('error')
         
     end = (datetime.now().timestamp())  
@@ -29,18 +42,23 @@ async def getGGContent(url='',political=''):
     start = (datetime.now().timestamp())
     r=requests.get(url)
     soup = BeautifulSoup(r.content,'html.parser')
-    await countString(soup,political)
+    asyncio.create_task(countString(soup,political))
     data = soup.findAll(attrs={"class":"r"})
+    print(len(data))
     for c in data:
-        #total=total+1
-        tag_a = c.find('a')
-        fw_url = str(tag_a['href'])
-        fw_url = fw_url.replace('/url?q=','')
-        if(fw_url.startswith('http') == False):
-           fw_url = "https://www.google.com/"+fw_url
-        print(tag_a.text,'->',fw_url)
-        if(fw_url.find('google') == -1):
-            await asyncio.create_task(getContent(fw_url,political)) 
+        try:
+            #total=total+1
+            tag_a = c.find('a')
+            fw_url = str(tag_a['href'])
+            fw_url = fw_url.replace('/url?q=','')
+            if(fw_url.startswith('http') == False):
+                fw_url = "https://www.google.com/"+fw_url
+            print(tag_a.text)
+            if(fw_url.find('google') == -1):
+                await asyncio.create_task(getContent(fw_url,political)) 
+
+        except:
+            continue
     end = (datetime.now().timestamp())  
 
 async def countString(soup,str):
