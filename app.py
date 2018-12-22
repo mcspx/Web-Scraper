@@ -47,8 +47,6 @@ async def getContent(url='',political='',n=0):
     end = (datetime.now().timestamp())  
 
 async def getGGContent(url='',political='',n=0):
-    r = redis.Redis(host='localhost', port=6379, db=0)
-    r.set("n"+str(n),0)
     start = (datetime.now().timestamp())
     r=requests.get(url)
     soup = BeautifulSoup(r.content,'html.parser')
@@ -72,6 +70,18 @@ async def getGGContent(url='',political='',n=0):
             continue
     end = (datetime.now().timestamp())  
 
+async def getListPolitical():
+    url = 'https://th.wikipedia.org/wiki/%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%9E%E0%B8%A3%E0%B8%A3%E0%B8%84%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87%E0%B9%83%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%97%E0%B8%A8%E0%B9%84%E0%B8%97%E0%B8%A2'
+    r=requests.get(url)
+    soup = BeautifulSoup(r.content,'html.parser')
+    data = soup.findAll(attrs={"class":"multicol"})
+    data = data[0].findAll('li')
+    political = []
+    for li in data:
+        a = li.find('a')
+        political.append(a.text)
+        #print(a.text)
+    return political
 async def countString(soup,str,n):
     await incSite()
     print("counting..")
@@ -99,6 +109,8 @@ async def main():
     url = 'https://www.google.co.th/search?q='
     # 10 political
     political = ['พรรคประชาธิปัตย์','พรรคประชากรไทย','พรรคมหาชน','พรรคกสิกรไทย','พรรคเพื่อฟ้าดิน','พรรคความหวังใหม่','พรรคเครือข่ายชาวนาแห่งประเทศไทย','พรรคเพื่อไทย','พรรคเพื่อแผ่นดิน','พรรคชาติพัฒนา']
+    political = await getListPolitical()
+    print(len(political))
     #url = 'https://en.wikipedia.org/wiki/'
     n = 0
     r = redis.Redis(host='localhost', port=6379, db=0)
@@ -116,5 +128,5 @@ async def main():
     
 # Python 3.7+
 asyncio.run(main())
-
+#asyncio.run(getListPolitical())
 #print(((int)(end - start)))
