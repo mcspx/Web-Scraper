@@ -31,10 +31,10 @@ async def getContent(url='',political='',n=0):
                 if(fw_url.find('google') == -1):
                     #print('n = ',n)
                     if fw_url in links:
-                        print('dup url')
+                        #print('dup url')
                         continue
                     else:
-                        print(a.text)
+                        #print(a.text)
                         links.append(fw_url)
                         #await asyncio.create_task(getContent(fw_url,political)) 
                         asyncio.run(getContent(fw_url,political,n))
@@ -63,7 +63,7 @@ async def getGGContent(url='',political='',n=0):
             fw_url = fw_url.replace('/url?q=','')
             if(fw_url.startswith('http') == False):
                 fw_url = "https://www.google.com/"+fw_url
-            print(c.text)
+            print(tag_a.text)
             if(fw_url.find('google') == -1):
                 await asyncio.create_task(getContent(fw_url,political,n)) 
                 #await asyncio.run(getContent(fw_url,political))
@@ -73,6 +73,7 @@ async def getGGContent(url='',political='',n=0):
     end = (datetime.now().timestamp())  
 
 async def countString(soup,str,n):
+    await incSite()
     print("counting..")
     body = soup.findAll('body')
     cnt_str = 0
@@ -90,7 +91,9 @@ async def countArticle(cnt,n=0):
         cnt = int(r.get(key)) + cnt
         r.set(key,cnt)
     #print(int(r.get("n1")))
-
+async def incSite():
+    r = redis.Redis(host='localhost', port=6379, db=0)
+    r.set('totalSite',int(r.get('totalSite'))+1)
 async def main():
     #total =0
     url = 'https://www.google.co.th/search?q='
@@ -98,22 +101,20 @@ async def main():
     political = ['พรรคประชาธิปัตย์','พรรคประชากรไทย','พรรคมหาชน','พรรคกสิกรไทย','พรรคเพื่อฟ้าดิน','พรรคความหวังใหม่','พรรคเครือข่ายชาวนาแห่งประเทศไทย','พรรคเพื่อไทย','พรรคเพื่อแผ่นดิน','พรรคชาติพัฒนา']
     #url = 'https://en.wikipedia.org/wiki/'
     n = 0
-    
+    r = redis.Redis(host='localhost', port=6379, db=0)
+    r.set('totalSite',0)
     for p in political:
         n = n+1
+        r.set('n'+str(n),0)
         await getGGContent(url+p,p,n)
     
     #await getGGContent(url+political[0],political[0],1)
     r = redis.Redis(host='localhost', port=6379, db=0)
     for key in r.keys():
-        print(key,'=',r.get(key),'->',political[int(key.replace('n',''))-1])
+        print(key,'=',r.get(key))
     #await asyncio.create_task(getGGContent(url+political[0],political[0]))
     
-    
 # Python 3.7+
-#total = 0
 asyncio.run(main())
-#print("Total:",total)
-#time.sleep(5)
 
 #print(((int)(end - start)))
