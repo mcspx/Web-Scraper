@@ -4,32 +4,67 @@ import requests
 import re
 from datetime import datetime
 import time
-async def getContent(url,total=0):
+async def getContent(url='',political=''):
+    #print(url)
     start = (datetime.now().timestamp())
     r=requests.get(url)
     soup = BeautifulSoup(r.content,'html.parser')
-    #data = soup.findAll('h3')
-    data = soup.findAll('div',attrs={'class':['g']})
-    #data = soup.findAll('h3',href=re.compile('/wiki'))
-    for c in data:
-        total=total+1
-        print(c.text)
-        #asyncio.create_task(getContent(a['href'],0)) 
+    await countString(soup,political)
+    data = soup.findAll('a')
+    for a in data:
+        try:
+            fw_url = str(a['href'])
+            fw_url = fw_url.replace('/url?q=','')
+            if(fw_url.startswith('http') == True):
+                await asyncio.create_task(getContent(fw_url,political)) 
+                #fw_url = "https://www.google.com/"+fw_url
+            #print(tag_a.text,'->',fw_url)
+        except:
+            pass
+            #print('error')
+        
     end = (datetime.now().timestamp())  
-    print('total ',total," time ",((int)(end - start)))
-    
-    #print("visit link per time ",((int)(end - start))," ",pages)
+
+async def getGGContent(url='',political=''):
+    start = (datetime.now().timestamp())
+    r=requests.get(url)
+    soup = BeautifulSoup(r.content,'html.parser')
+    await countString(soup,political)
+    data = soup.findAll(attrs={"class":"r"})
+    for c in data:
+        #total=total+1
+        tag_a = c.find('a')
+        fw_url = str(tag_a['href'])
+        fw_url = fw_url.replace('/url?q=','')
+        if(fw_url.startswith('http') == False):
+           fw_url = "https://www.google.com/"+fw_url
+        print(tag_a.text,'->',fw_url)
+        if(fw_url.find('google') == -1):
+            await asyncio.create_task(getContent(fw_url,political)) 
+    end = (datetime.now().timestamp())  
+
+async def countString(soup,str):
+    body = soup.findAll('body')
+    cnt_str = 0
+    for b in body:
+        cnt_str = cnt_str + b.text.count(str)
+    print('total cnt str(',str,') = ',cnt_str)
 
 async def main():
-    total =0
+    #total =0
+    url = 'https://www.google.co.th/search?q='
+    # 10 political
+    political = ['พรรคประชาธิปัตย์','พรรคประชากรไทย','พรรคมหาชน','พรรคกสิกรไทย','พรรคเพื่อฟ้าดิน','พรรคความหวังใหม่','พรรคเครือข่ายชาวนาแห่งประเทศไทย','พรรคเพื่อไทย','พรรคเพื่อแผ่นดิน','พรรคชาติพัฒนา']
     #url = 'https://en.wikipedia.org/wiki/'
-    url = 'https://www.google.com/search?ei=4-EdXIGlC4vUvATlkp7IBQ&q=%E0%B8%9E%E0%B8%A3%E0%B8%A3%E0%B8%84%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%9B%E0%B8%B1%E0%B8%95%E0%B8%A2%E0%B9%8C&oq=%E0%B8%9E%E0%B8%A3%E0%B8%A3%E0%B8%84%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%9B%E0%B8%B1%E0%B8%95%E0%B8%A2%E0%B9%8C&gs_l=psy-ab.3..0i71l8.0.0..10351...0.0..0.0.0.......0......gws-wiz.uDssdTUUxtg'
-    await asyncio.create_task(getContent(url,total))
-    print("Total:",total)
+    #for p in political:
+    #    await asyncio.create_task(getGGContent(url+p,p))
+    await asyncio.create_task(getGGContent(url+political[0],political[0]))
+    
 # Python 3.7+
-
+#total = 0
 asyncio.run(main())
-
+#print("Total:",total)
 #time.sleep(5)
 
 #print(((int)(end - start)))
+
