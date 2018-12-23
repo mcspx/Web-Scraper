@@ -7,7 +7,7 @@ import time
 import redis
 import json
 async def getContent(url='',political='',n=0):
-    start = (datetime.now().timestamp())
+    #start = (datetime.now().timestamp())
     #print('connecting...')
     r=requests.get(url)
     #print('connected')
@@ -46,7 +46,7 @@ async def getContent(url='',political='',n=0):
     end = (datetime.now().timestamp())  
 
 async def getGGContent(url='',political='',n=0):
-    start = (datetime.now().timestamp())
+    #start = (datetime.now().timestamp())
     r=requests.get(url)
     soup = BeautifulSoup(r.content,'html.parser')
     #asyncio.create_task(countString(soup,political))
@@ -107,7 +107,7 @@ async def main():
     #total =0
     url = 'https://www.google.co.th/search?q='
     # 10 political
-    political = ['พรรคประชาธิปัตย์','พรรคประชากรไทย','พรรคมหาชน','พรรคกสิกรไทย','พรรคเพื่อฟ้าดิน','พรรคความหวังใหม่','พรรคเครือข่ายชาวนาแห่งประเทศไทย','พรรคเพื่อไทย','พรรคเพื่อแผ่นดิน','พรรคชาติพัฒนา']
+    #political = ['พรรคประชาธิปัตย์','พรรคประชากรไทย','พรรคมหาชน','พรรคกสิกรไทย','พรรคเพื่อฟ้าดิน','พรรคความหวังใหม่','พรรคเครือข่ายชาวนาแห่งประเทศไทย','พรรคเพื่อไทย','พรรคเพื่อแผ่นดิน','พรรคชาติพัฒนา']
     political = await getListPolitical()
     print(len(political))
     #url = 'https://en.wikipedia.org/wiki/'
